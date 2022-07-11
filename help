@@ -1,0 +1,261 @@
+Comprar dedicado
+
+Baixar Bitvise SSH Client no seu computador
+	i agree
+	yes
+	
+	Achar ip da conecção SSH na dedicado
+	
+	Colocar ip da SSH
+	Colocar usarname salvo da dedicado
+	initial method: publickey
+	
+	Em baixo, azul, apertar em CLIENT KEY MANAGER
+	Importar o arquivo da key da dedicado PRT: http://prntscr.com/110yh4a
+	
+	Client key: Selecionar Global 1
+	Accept and save
+	
+	New terminal console (direita)
+	
+	
+sudo su (Basicamente abre modo administrador) || Caso peça algum login geralmente é a senha da conecção
+	
+screen -S nomeDaTela (Criar nova tela, S maiusculo) 
+					 (Pra caso fechar a tela sem querer ia ficar online, se fizesse no terminal se fechar pode perder tudo)
+					 
+bash <(curl -s https://raw.githubusercontent.com/VilhelmPrytz/pterodactyl-installer/master/install-panel.sh)
+(Instalar o painel da ptero)
+
+	Nome do painel, panel
+	Username, pterodactyl
+	Password, a senha que vocês quiserem
+	Timezone, Enter
+	
+	Colocar seu email 2x
+	Initial username, pterodactyl
+	First Name, Guilherme
+	Last Name, Martins
+	Password, a sua senha
+	
+	Link panel, seu ip com dominio (Não pode ser numérico)
+	Firewall, y
+	HTTPS, n
+	Assume SSL, n
+	Continue installation, y
+	
+Espera carregar e avisa sobre a ordem
+
+curl -sSL https://get.docker.com/ | CHANNEL=stable bash
+(Colocar extenção)
+
+systemctl enable --now docker
+(Iniciar extenção)
+
+
+(Instalar wings)
+mkdir -p /etc/pterodactyl
+curl -L -o /usr/local/bin/wings https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_amd64
+chmod u+x /usr/local/bin/wings
+
+Colocar ip da dedicado no navegador
+
+Ir em locations, create a new
+Brasil
+
+Ir em nodes, create a new
+
+Name: Node
+Dercription: Node Application
+Location: Brasil
+Node Visibility: Public
+FQDN: seuip.com
+HTTO Connection
+Not Behind Proxy
+
+Total memory: (Memory total da dedicado)
+Memory over-allocation: -1
+Total disk space: 10k
+Disck Over-Allocation: -1
+Daemon port manter
+Create node
+
+Allocation:
+	Ip: IpDaMaquina (Caso não funcione ao iniciar o server utilize 0.0.0.0)
+	Ip Alias: servidor (Caso o ip colocado tenha sido redeblades.com, se colocar servidor, será servidor.redeblades.com)
+					   (Como se o ip colocado antes fosse um dominio geral do painel, podendo fazer subdomínios)
+	Ports: 25565
+	Submit
+	
+
+Configuration:
+	Copiar tudo
+	ir no terminal
+	Digitar: 
+			cd /etc/pterodactyl
+			nano config.yml
+	Colar codigo
+	Control X
+	Y
+	Enter
+	
+sudo wings --debug
+(Iniciar servidor)
+
+(Verificar se está tudo certo)
+cd /etc/systemd/system
+nano wings.service
+Copiar:
+
+
+
+	[Unit]
+Description=Pterodactyl Wings Daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/pterodactyl
+LimitNOFILE=4096
+PIDFile=/var/run/wings/daemon.pid
+ExecStart=/usr/local/bin/wings
+Restart=on-failure
+StartLimitInterval=600
+[Install]
+WantedBy=multi-user.target
+
+
+
+Control X
+Y
+Enter
+systemctl enable --now wings
+systemctl enable --now wings
+
+
+
+
+Apartir disso, não tem paperspigot ou outros jar semelhantes
+Baixar arquivos eggs de outros jar's
+
+Nests, create new
+Name: Oque quiserem
+Salvar
+
+Voltar a nests
+import egg
+escolher o egg que quiser, selecionar sua nests
+
+Não vai funcionar ainda, pra funcionar é preciso (Toda vez que adicionar um egg, tem que reiniciar)
+ir no terminal novamente, dar Control C
+E digitar:
+		systemctl disable --now wings
+		sudo wings --debug
+
+Servers:
+	create new
+	name: seuServer
+	serverOwner: gurielplays@gmail.com (Email do painel admin, ou do cliente)
+	
+	Node: Node (Máquina brasileira)
+	Database limit: 1 (Quantas datasbases o player pode ter)
+	
+	Memory: 2024 
+	Disk space: 2500
+	CPU Limit: 100%
+	
+	Nest: Ptero (O .jar que voce deixar)
+	Egg: Paper (A mesma do .jar)
+	Skip egg oinstal script falso
+
+	Startup Configuration: Alterar o codigo pra 500M
+
+	create server
+	
+
+
+apt update (Atualizar repositorios ubuntu)
+
+apt install netstat
+
+netstat -ltnp | grep 8080
+
+ufw status
+ufw allow 8080
+ufw allow 2022
+
+
+
+### Caso o ip esteja errado ###
+
+cd /var/www/pterodactyl   -----ETAPA 1
+ls -a
+cat .env
+nano .env
+Control X
+Y
+Enter
+
+
+
+vi /etc/pterodactyl/config.yml   -----ETAPA 2
+Control G
+Procurar remote
+Apertar I
+Exluir ip e colocar ip EX: redearcanjo.com
+Esc
+:
+wq
+Enter
+
+
+
+vi /etc/nginx/sites-available/pterodactyl.conf   -----ETAPA 3
+I
+Alterar ip
+Esc
+:
+wq Enter
+
+
+
+nginx -t (Testar conecção)
+
+(Reiniciar nginx e wings)
+systemctl restart nginx
+systemctl restart wings
+
+(Limpar cache)
+php artisan view:clear
+php artisan config:clear
+
+
+
+#### Erro de config
+rm config.yml
+Copiar config em nodes
+nano config.yml
+Colar config do nodes
+Control X
+Y
+Enter
+
+
+
+#### Se não certificado de sergurança na clound
+Ir em SSL/TLS
+Desligado(Não seguro)
+
+
+
+#### Error no console ao ligar o server
+netstat -ltnp | grep 25565 (Se não der em nada tem um erro)
+cat /etc/netplan/50-cloud-init.yaml
+
+
+
+
+
+
